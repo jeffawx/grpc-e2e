@@ -26,8 +26,8 @@ class ApplicationTests {
     @Test
     fun `can create user and load`() {
         val user = User(name = "Jeff")
-        val userId = userClient.create(user).block()!!
-        assertEquals(user.name, userClient.get(userId).block()?.name)
+        val userId = userClient.create(user)
+        assertEquals(user.name, userClient.get(userId).name)
     }
 
     @Test
@@ -35,7 +35,7 @@ class ApplicationTests {
         val user = User(name = "J")
 
         val exception = assertThrows<Throwable> {
-            userClient.create(user).block()
+            userClient.create(user)
         }
 
         val error = StatusProto.fromThrowable(exception)!!

@@ -15,9 +15,8 @@ repositories {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     runtimeOnly("com.h2database:h2")
-    runtimeOnly("io.r2dbc:r2dbc-h2")
 }
 
 tasks.withType<KotlinCompile> {
@@ -32,6 +31,6 @@ tasks.withType<Test> {
 }
 
 grpc {
-    reactorInterface()                      // By default generates coroutines interface
+    blockingInterface("defaultExecutor")
     serviceInterfaceNameSuffix("Api") // Default value is "Rpc"
 }
