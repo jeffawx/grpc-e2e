@@ -1,4 +1,4 @@
-package demo
+package com.airwallex.demo
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
