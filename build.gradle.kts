@@ -30,3 +30,8 @@ tasks.withType<KotlinCompile> {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+grpc {
+    reactorInterface()                      // By default generates coroutines interface
+    serviceInterfaceNameSuffix("Api") // Default value is "Rpc"
+}
