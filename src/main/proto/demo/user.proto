@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package demo;
+
+import "airwallex/protobuf/message_mapping.proto";
+import "airwallex/type/uuid.proto";
+
+service UserService {
+  rpc Create(User) returns (airwallex.type.UUID) {}
+  rpc Get(airwallex.type.UUID) returns (User) {}
+}
+
+message User {
+  optional airwallex.type.UUID id = 1;
+  string name = 2;
+  optional string email = 3;
+}
