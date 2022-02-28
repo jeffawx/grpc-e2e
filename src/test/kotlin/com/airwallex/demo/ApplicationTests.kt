@@ -1,13 +1,17 @@
 package com.airwallex.demo
 
 import com.airwallex.grpc.annotations.GrpcClient
-import com.google.rpc.BadRequest
-import demo.UserServiceApi
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.get
+import demo.UserServiceRpc
 import io.grpc.Status
-import io.grpc.protobuf.StatusProto
-import org.junit.jupiter.api.Assertions.assertEquals
+import java.util.UUID
+import kotlin.test.assertContains
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
@@ -21,32 +25,46 @@ class ApplicationTests {
 
     @Autowired
     @GrpcClient
-    private lateinit var userClient: UserServiceApi
+    private lateinit var userClient: UserServiceRpc
 
     @Test
-    fun `can create user and load`() {
+    fun `create user and load`() = runBlocking {
         val user = User(name = "Jeff")
-        val userId = userClient.create(user).block()!!
-        assertEquals(user.name, userClient.get(userId).block()?.name)
+        val userId = userClient.create(user).get()
+
+        assertNotNull(userId)
+        assertEquals(user.name, userClient.get(userId).get()!!.name)
     }
 
     @Test
-    fun `create user validation failed`() {
+    fun `create user validation failed`() = runBlocking {
         val user = User(name = "J")
 
-        val exception = assertThrows<Throwable> {
-            userClient.create(user).block()
-        }
+        val result = userClient.create(user)
+        assertTrue(result is Err)
 
-        val error = StatusProto.fromThrowable(exception)!!
-        assertEquals(Status.Code.INVALID_ARGUMENT.value(), error.code)
+        val error = result.error
+        assertEquals(Status.Code.INVALID_ARGUMENT, error.statusCode)
+        assertContains(error.details, "x-validate-name")
+    }
 
-        val details = error.detailsList.first {
-            it.`is`(BadRequest::class.java)
-        }.unpack(BadRequest::class.java)
+    @Test
+    fun `create user custom error`() = runBlocking {
+        val user = User(name = "admin")
 
-        val nameError = details.fieldViolationsList.first()
-        assertEquals("name", nameError.field)
-        assertEquals("invalid name", nameError.description)
+        val result = userClient.create(user)
+        assertTrue(result is Err)
+
+        val error = result.error
+        assertEquals(Status.Code.INVALID_ARGUMENT, error.statusCode)
+        assertEquals("INVALID_ARGUMENT: cannot create admin", error.description)
+        assertEquals(mapOf("invalid_name" to "admin"), error.details)
+    }
+
+    @Test
+    fun `user not found`() = runBlocking {
+        val result = userClient.get(UUID.randomUUID())
+        assertTrue(result is Err)
+        assertEquals(Status.Code.NOT_FOUND, result.error.statusCode)
     }
 }

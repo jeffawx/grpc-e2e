@@ -1,17 +1,35 @@
 package com.airwallex.demo
 
-import demo.UserServiceApi
+import com.airwallex.grpc.error.Error
+import com.airwallex.grpc.error.singleResult
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Result
+import demo.UserServiceRpc
+import io.grpc.Status.Code.INVALID_ARGUMENT
 import java.util.UUID
 import javax.validation.Valid
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import reactor.core.publisher.Mono
 
 @Service
 @Transactional
-class UserService(private val repo: UserRepository) : UserServiceApi {
+class UserService(private val repo: UserRepository) : UserServiceRpc {
 
-    override fun create(@Valid request: User): Mono<UUID> = repo.save(request).mapNotNull { it.id }
+    override suspend fun create(@Valid request: User): Result<UUID, Error> {
+        if (request.name == "admin") {
+            return Err(
+                Error.of(
+                    statusCode = INVALID_ARGUMENT,
+                    description = "cannot create admin",
+                    details = mapOf("invalid_name" to request.name)
+                )
+            )
+        }
 
-    override fun get(request: UUID): Mono<User> = repo.findById(request)
+        return repo.save(request).map { it.id!! }.singleResult()
+    }
+
+    override suspend fun get(request: UUID): Result<User, Error> {
+        return repo.findById(request).singleResult()
+    }
 }
