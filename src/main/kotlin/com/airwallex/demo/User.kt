@@ -10,7 +10,7 @@ data class User(
     @Id
     val id: UUID? = null,
 
-    @get:Size(min = 2, max = 10, message = "invalid name")
+    @get:Size(min = 2, max = 10, message = "name should contain 2-10 characters")
     val name: String,
 
     @get:Email

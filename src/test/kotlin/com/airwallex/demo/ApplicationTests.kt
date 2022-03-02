@@ -4,9 +4,9 @@ import com.airwallex.grpc.annotations.GrpcClient
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.get
 import demo.UserServiceRpc
-import io.grpc.Status
+import io.grpc.Status.Code.INVALID_ARGUMENT
+import io.grpc.Status.Code.NOT_FOUND
 import java.util.UUID
-import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -44,8 +44,11 @@ class ApplicationTests {
         assertTrue(result is Err)
 
         val error = result.error
-        assertEquals(Status.Code.INVALID_ARGUMENT, error.statusCode)
-        assertContains(error.details, "x-validate-name")
+        assertEquals(INVALID_ARGUMENT, error.statusCode)
+        assertEquals(
+            mapOf("x-validate-name" to "name should contain 2-10 characters"),
+            error.details
+        ) // bean validation errors
     }
 
     @Test
@@ -56,15 +59,16 @@ class ApplicationTests {
         assertTrue(result is Err)
 
         val error = result.error
-        assertEquals(Status.Code.INVALID_ARGUMENT, error.statusCode)
-        assertEquals("INVALID_ARGUMENT: cannot create admin", error.description)
-        assertEquals(mapOf("invalid_name" to "admin"), error.details)
+        assertEquals(INVALID_ARGUMENT, error.statusCode)
+        assertEquals("ADMIN_NOT_ALLOWED", error.code) // custom error code propagated to client
+        assertEquals("cannot create admin", error.description)
+        assertEquals("admin", error.details["invalid_name"]) // custom error details propagated to client
     }
 
     @Test
     fun `user not found`() = runBlocking {
         val result = userClient.get(UUID.randomUUID())
         assertTrue(result is Err)
-        assertEquals(Status.Code.NOT_FOUND, result.error.statusCode)
+        assertEquals(NOT_FOUND, result.error.statusCode)
     }
 }

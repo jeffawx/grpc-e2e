@@ -2,10 +2,8 @@ package com.airwallex.demo
 
 import com.airwallex.grpc.error.Error
 import com.airwallex.grpc.error.singleResult
-import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Result
 import demo.UserServiceRpc
-import io.grpc.Status.Code.INVALID_ARGUMENT
 import java.util.UUID
 import javax.validation.Valid
 import org.springframework.stereotype.Service
@@ -15,18 +13,16 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class UserService(private val repo: UserRepository) : UserServiceRpc {
 
-    override suspend fun create(@Valid request: User): Result<UUID, Error> {
+    override suspend fun create(/* Trigger validation rules in User class*/@Valid request: User): Result<UUID, Error> {
         if (request.name == "admin") {
-            return Err(
-                Error.of(
-                    statusCode = INVALID_ARGUMENT,
-                    description = "cannot create admin",
-                    details = mapOf("invalid_name" to request.name)
-                )
+            return Error.invalid( // gRPC status code inferred from helper method name
+                code = "ADMIN_NOT_ALLOWED", // optional application defined code, only for demo purpose
+                reason = "cannot create admin",
+                details = mapOf("invalid_name" to request.name) // extra data passed back to client, optional
             )
         }
 
-        return repo.save(request).map { it.id!! }.singleResult()
+        return repo.save(request).map { it.id!! }.singleResult() // r2dbc returns Mono, needs to convert to Result.
     }
 
     override suspend fun get(request: UUID): Result<User, Error> {
