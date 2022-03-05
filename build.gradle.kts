@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("com.airwallex.grpc-spring") version "1.1.6.1"
+    id("com.airwallex.grpc-spring") version "1.2.0"
 }
 
 group = "demo"
@@ -23,7 +23,7 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
+        freeCompilerArgs = listOf("-Xjsr305=strict", "-opt-in=kotlin.RequiresOptIn")
         jvmTarget = "11"
     }
 }
