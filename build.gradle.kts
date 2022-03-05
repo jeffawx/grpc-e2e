@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("com.airwallex.grpc-spring") version "1.1.5"
+    id("com.airwallex.grpc-spring") version "1.2.0"
 }
 
 group = "demo"
@@ -17,11 +17,12 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     runtimeOnly("com.h2database:h2")
+    testImplementation(kotlin("test"))
 }
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
+        freeCompilerArgs = listOf("-Xjsr305=strict", "-opt-in=kotlin.RequiresOptIn")
         jvmTarget = "11"
     }
 }
@@ -32,5 +33,4 @@ tasks.withType<Test> {
 
 grpc {
     blockingInterface("defaultExecutor")
-    serviceInterfaceNameSuffix("Api") // Default value is "Rpc"
 }
