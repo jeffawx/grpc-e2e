@@ -24,7 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest
 class ApplicationTests {
 
     @Autowired
-    @GrpcClient
+    @GrpcClient(id = "userClient") // Need to specify bean name/qualifier because there are 2 UserServiceRpc (including service impl) in context
     private lateinit var userClient: UserServiceRpc
 
     @Test
