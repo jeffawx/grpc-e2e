@@ -4,7 +4,9 @@ import java.util.UUID
 import javax.validation.constraints.Email
 import javax.validation.constraints.Size
 import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Table
 
+@Table("users")
 data class User(
 
     @Id
