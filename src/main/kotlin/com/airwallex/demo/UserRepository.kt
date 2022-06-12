@@ -1,8 +1,8 @@
 package com.airwallex.demo
 
 import java.util.UUID
-import org.springframework.data.repository.reactive.ReactiveCrudRepository
+import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface UserRepository : ReactiveCrudRepository<User, UUID>
+interface UserRepository : CoroutineCrudRepository<User, UUID>

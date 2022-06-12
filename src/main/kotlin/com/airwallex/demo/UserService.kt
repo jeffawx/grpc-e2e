@@ -1,7 +1,7 @@
 package com.airwallex.demo
 
 import com.airwallex.grpc.error.Error
-import com.airwallex.grpc.error.singleResult
+import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import demo.UserServiceRpc
 import java.util.UUID
@@ -22,10 +22,10 @@ class UserService(private val repo: UserRepository) : UserServiceRpc {
             )
         }
 
-        return repo.save(request).map { it.id!! }.singleResult() // r2dbc returns Mono, needs to convert to Result.
+        return Ok(repo.save(request).id!!)
     }
 
     override suspend fun get(request: UUID): Result<User, Error> {
-        return repo.findById(request).singleResult()
+        return repo.findById(request)?.let(::Ok) ?: Error.notFound()
     }
 }
