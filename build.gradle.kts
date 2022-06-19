@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("com.airwallex.grpc-spring") version "1.2.6"
+    id("com.airwallex.grpc-spring") version "1.2.7"
 }
 
 group = "demo"
@@ -16,6 +16,7 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     runtimeOnly("com.h2database:h2")
     runtimeOnly("io.r2dbc:r2dbc-h2")
     testImplementation(kotlin("test"))
